@@ -108,10 +108,13 @@ class Vedirect:
         elif self.state == self.in_key:
             self.bytes_sum += ord(byte)
             if byte == self.delimiter:
-                if self.key.decode() == 'Checksum':
-                    self.state = self.in_checksum
-                else:
-                    self.state = self.in_value
+                try:
+                    if self.key.decode() == 'Checksum':
+                        self.state = self.in_checksum
+                    else:
+                        self.state = self.in_value
+                except:
+                    print("Exception on decode?")
             else:
                 self.key += byte
 
@@ -121,7 +124,10 @@ class Vedirect:
             self.bytes_sum += ord(byte)
             if byte == self.header1:
                 self.state = self.wait_header
-                self.dict[self.key.decode()] = self.value.decode()
+                try:
+                    self.dict[self.key.decode()] = self.value.decode()
+                except:
+                    print("Exception on decode (utf-8)")
                 self.key = bytearray()
                 self.value = bytearray()
             else:
@@ -156,6 +162,7 @@ class Vedirect:
             byte = self.ser.read(1)
             packet = self.input(byte)
             if packet is not None:
+                #print("Packet: '%s'" % str(packet))
                 return packet
 
     def read_data_callback(self, callback):
@@ -164,6 +171,7 @@ class Vedirect:
             if byte:
                 packet = self.input(byte)
                 if packet is not None:
+                    #print("Packet: '%s'" % str(packet))
                     callback(packet)
             else:
                 break

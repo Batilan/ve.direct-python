@@ -1,0 +1,2 @@
+#python -u -m vedirect --influx=10.204.3.120 --database=weather_stations --port=/dev/ttyUSB0
+python -u -m vedirect  --port=/dev/ttyUSB0

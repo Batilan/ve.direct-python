@@ -2,6 +2,7 @@
 CLI Entry point
 """
 import argparse
+import datetime
 
 from vedirect.influxdb import influx
 from vedirect.vedirect import Vedirect
@@ -9,6 +10,10 @@ from influxdb import InfluxDBClient
 
 influx_client = None
 influx_db = None
+PUBLISH_INTERVAL=60.0 # publish interval in seconds
+STATUS_FILENAME="/tmp/victron_status.json"
+next_publish_time = datetime.datetime.now()
+
 
 def main():
     """
@@ -22,18 +27,24 @@ def main():
     args = parser.parse_args()
 
     global influx_db, influx_client
-    influx_client = InfluxDBClient(host=args.influx, port=8086)
-    influx_db = args.database
+    #influx_client = InfluxDBClient(host=args.influx, port=8086)
+    #influx_db = args.database
 
     ve = Vedirect(args.port)
     ve.read_data_callback(on_victron_data_callback)
 
 def on_victron_data_callback(data):
-    measurements = influx.measurements_for_packet(data)
-    influx_client.write_points(measurements, database=influx_db)
+    global next_publish_time
 
-    print(measurements)
-
+    if datetime.datetime.now() > next_publish_time:
+        measurements = influx.measurements_for_packet(data)
+        #influx_client.write_points(measurements, database=influx_db)
+        next_publish_time = datetime.datetime.now() + datetime.timedelta(seconds=PUBLISH_INTERVAL)
+        print(measurements)
+        # Also print latest status to file for easy access
+        with open(STATUS_FILENAME , 'w') as status_file:
+            status_file.write(repr(measurements))
+            status_file.write("\n")
 
 if __name__ == "__main__":
     main()
