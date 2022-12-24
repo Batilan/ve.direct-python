@@ -115,6 +115,7 @@ class Vedirect:
                         self.state = self.in_value
                 except:
                     print("Exception on decode?")
+                    self.state = self.wait_header # What is best way to handle this?
             else:
                 self.key += byte
 
@@ -128,6 +129,7 @@ class Vedirect:
                     self.dict[self.key.decode()] = self.value.decode()
                 except:
                     print("Exception on decode (utf-8)")
+                    self.state = self.wait_header # What is best way to handle this?
                 self.key = bytearray()
                 self.value = bytearray()
             else:
@@ -174,4 +176,5 @@ class Vedirect:
                     #print("Packet: '%s'" % str(packet))
                     callback(packet)
             else:
+                print("Exiting read loop because no data could be read")
                 break

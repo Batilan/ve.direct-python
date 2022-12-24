@@ -27,8 +27,13 @@ def main():
     args = parser.parse_args()
 
     global influx_db, influx_client
-    #influx_client = InfluxDBClient(host=args.influx, port=8086)
-    #influx_db = args.database
+    print("Connecting to InfluxDB")
+    influx_client = InfluxDBClient(host=args.influx, port=8086)
+    influx_db = args.database
+    if influx_client:
+        print("Connected to InfluxDB %s" % args.influx)
+    else:
+        print("Could not connect to InfluxDB %s" % args.influx)
 
     ve = Vedirect(args.port)
     ve.read_data_callback(on_victron_data_callback)
@@ -38,7 +43,7 @@ def on_victron_data_callback(data):
 
     if datetime.datetime.now() > next_publish_time:
         measurements = influx.measurements_for_packet(data)
-        #influx_client.write_points(measurements, database=influx_db)
+        influx_client.write_points(measurements, database=influx_db)
         next_publish_time = datetime.datetime.now() + datetime.timedelta(seconds=PUBLISH_INTERVAL)
         print(measurements)
         # Also print latest status to file for easy access
