@@ -35,8 +35,9 @@ def main():
     else:
         print("Could not connect to InfluxDB %s" % args.influx)
 
-    ve = Vedirect(args.port)
-    ve.read_data_callback(on_victron_data_callback)
+    while True:
+        ve = Vedirect(args.port)
+        ve.read_data_callback(on_victron_data_callback)
 
 def on_victron_data_callback(data):
     global next_publish_time

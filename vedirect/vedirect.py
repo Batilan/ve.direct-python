@@ -1,3 +1,5 @@
+import time
+import traceback
 import serial
 
 """
@@ -79,7 +81,12 @@ class Vedirect:
         :param port:
         :param timeout:
         """
-        self.ser = serial.Serial(port, 19200, timeout=timeout)
+        try:
+            self.ser = serial.Serial(port, 19200, timeout=timeout)
+        except serial.serialutil.SerialException:
+            print("Exception reading from Serial port")
+            traceback.print_exc()
+            time.sleep(0.1)
         self.header1 = b'\r'
         self.header2 = b'\n'
         self.delimiter = b'\t'
@@ -161,15 +168,28 @@ class Vedirect:
 
     def read_data_single(self):
         while True:
-            byte = self.ser.read(1)
-            packet = self.input(byte)
+            try:
+                byte = self.ser.read(1)
+            except  serial.serialutil.SerialException:
+                print("Exception reading from Serial port")
+                traceback.print_exc()
+                time.sleep(0.1)
+                self.ser = serial.Serial(port, 19200, timeout=timeout)
+            if byte:
+                packet = self.input(byte)
             if packet is not None:
                 #print("Packet: '%s'" % str(packet))
                 return packet
 
     def read_data_callback(self, callback):
         while True:
-            byte = self.ser.read(1)
+            try:
+                byte = self.ser.read(1)
+            except  serial.serialutil.SerialException:
+                print("Exception reading from Serial port")
+                traceback.print_exc()
+                time.sleep(0.1)
+                byte = None
             if byte:
                 packet = self.input(byte)
                 if packet is not None:
