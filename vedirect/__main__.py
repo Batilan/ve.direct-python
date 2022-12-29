@@ -3,6 +3,7 @@ CLI Entry point
 """
 import argparse
 import datetime
+import time
 
 from vedirect.influxdb import influx
 from vedirect.vedirect import Vedirect
@@ -10,7 +11,7 @@ from influxdb import InfluxDBClient
 
 influx_client = None
 influx_db = None
-PUBLISH_INTERVAL=60.0 # publish interval in seconds
+PUBLISH_INTERVAL=30.0 # publish interval in seconds
 STATUS_FILENAME="/tmp/victron_status.json"
 next_publish_time = datetime.datetime.now()
 
@@ -36,8 +37,10 @@ def main():
         print("Could not connect to InfluxDB %s" % args.influx)
 
     while True:
+        # Loop and try to recover by re-opening / re-initializing the Serial port
         ve = Vedirect(args.port)
         ve.read_data_callback(on_victron_data_callback)
+        time.sleep(0.1)
 
 def on_victron_data_callback(data):
     global next_publish_time

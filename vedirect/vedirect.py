@@ -81,9 +81,9 @@ class Vedirect:
         :param port:
         :param timeout:
         """
-        try:
+        try :
             self.ser = serial.Serial(port, 19200, timeout=timeout)
-        except serial.serialutil.SerialException:
+        except (serial.serialutil.SerialException, FileNotFoundError):
             print("Exception reading from Serial port")
             traceback.print_exc()
             time.sleep(0.1)
@@ -122,7 +122,7 @@ class Vedirect:
                         self.state = self.in_value
                 except:
                     print("Exception on decode?")
-                    self.state = self.wait_header # What is best way to handle this?
+                    self.state = self.in_checksum # What is best way to handle this?
             else:
                 self.key += byte
 
@@ -166,6 +166,8 @@ class Vedirect:
         else:
             raise AssertionError()
 
+        return None
+
     def read_data_single(self):
         while True:
             try:
@@ -185,7 +187,8 @@ class Vedirect:
         while True:
             try:
                 byte = self.ser.read(1)
-            except  serial.serialutil.SerialException:
+            except  (serial.serialutil.SerialException, AttributeError):
+                # Note: AttributeError might occur when Serial Port is no longer valid
                 print("Exception reading from Serial port")
                 traceback.print_exc()
                 time.sleep(0.1)
