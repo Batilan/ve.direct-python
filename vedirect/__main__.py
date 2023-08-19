@@ -11,7 +11,7 @@ from influxdb import InfluxDBClient
 
 influx_client = None
 influx_db = None
-PUBLISH_INTERVAL=60.0 # publish interval in seconds
+PUBLISH_INTERVAL=30.0 # publish interval in seconds
 STATUS_FILENAME="/tmp/victron_status.json"
 next_publish_time = datetime.datetime.now()
 
@@ -37,13 +37,14 @@ def main():
         print("Could not connect to InfluxDB %s" % args.influx)
 
     while True:
+        # Loop and try to recover by re-opening / re-initializing the Serial port
         try:
             ve = Vedirect(args.port)
             ve.read_data_callback(on_victron_data_callback)
         except  Exception as e:
             print("Exception occurred in main loop: %s" % str(e))
             print("Waiting a bit for recovery (e.g. Interface %s becoming available again)" % args.port)
-            time.sleep(3.0)
+            time.sleep(5.0)
 
 def on_victron_data_callback(data):
     global next_publish_time
