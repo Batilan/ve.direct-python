@@ -116,13 +116,14 @@ class Vedirect:
             self.bytes_sum += ord(byte)
             if byte == self.delimiter:
                 try:
-                    if self.key.decode() == 'Checksum':
+                    if self.key.decode(errors='ignore') == 'Checksum':
                         self.state = self.in_checksum
                     else:
                         self.state = self.in_value
-                except:
-                    print("Exception on decode?")
-                    self.state = self.wait_header # What is best way to handle this?
+                except Exception as e:
+                    print(f"An exception occurred on decode: {str(e)}\n" +
+                          f"state: {str(self.state)}")
+                    self.state = self.wait_header # What is best way to handle this? Restart seems to help, so re-open device?
             else:
                 self.key += byte
 
@@ -133,9 +134,9 @@ class Vedirect:
             if byte == self.header1:
                 self.state = self.wait_header
                 try:
-                    self.dict[self.key.decode()] = self.value.decode()
+                    self.dict[self.key.decode(errors='ignore')] = self.value.decode(errors='ignore')
                 except:
-                    print("Exception on decode (utf-8)")
+                    print(f"An exception occurred on decode: {str(e)}")
                     self.state = self.wait_header # What is best way to handle this?
                 self.key = bytearray()
                 self.value = bytearray()

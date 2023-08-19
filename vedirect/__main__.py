@@ -3,6 +3,7 @@ CLI Entry point
 """
 import argparse
 import datetime
+import time
 
 from vedirect.influxdb import influx
 from vedirect.vedirect import Vedirect
@@ -36,8 +37,13 @@ def main():
         print("Could not connect to InfluxDB %s" % args.influx)
 
     while True:
-        ve = Vedirect(args.port)
-        ve.read_data_callback(on_victron_data_callback)
+        try:
+            ve = Vedirect(args.port)
+            ve.read_data_callback(on_victron_data_callback)
+        except  Exception as e:
+            print("Exception occurred in main loop: %s" % str(e))
+            print("Waiting a bit for recovery (e.g. Interface %s becoming available again)" % args.port)
+            time.sleep(3.0)
 
 def on_victron_data_callback(data):
     global next_publish_time

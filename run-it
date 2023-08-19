@@ -1,3 +1,4 @@
 #!/bin/bash
-python -u -m vedirect --influx=10.204.3.120 --database=weather_stations --port=/dev/ttyUSB0 | tee -a  /home/strien/vedirect.log
+cd /home/strien/ve.direct-python
+python -u -m vedirect --influx=localhost --database=container --port=/dev/ttyUSB0 | tee -a  /home/strien/vedirect.log
 #python -u -m vedirect  --port=/dev/ttyUSB0
