@@ -81,12 +81,8 @@ class Vedirect:
         :param port:
         :param timeout:
         """
-        try :
-            self.ser = serial.Serial(port, 19200, timeout=timeout)
-        except (serial.serialutil.SerialException, FileNotFoundError):
-            print("Exception reading from Serial port")
-            traceback.print_exc()
-            time.sleep(0.1)
+        # Don't handle exception in constructor, but let main/caller handle it
+        self.ser = serial.Serial(port, 19200, timeout=timeout)
         self.header1 = b'\r'
         self.header2 = b'\n'
         self.delimiter = b'\t'
